@@ -1,0 +1,16 @@
+# Web Framework & API
+django==5.2.*
+djangorestframework==3.16.1
+django-cors-headers==4.9.0
+
+# Database & Environment
+psycopg2-binary==2.9.11
+django-environ==0.13.0
+
+# Cloud Storage & Media
+boto3==1.42.62
+django-storages==1.14.6
+pillow==12.1.1
+
+# Async & HTTP
+httpx==0.28.1
