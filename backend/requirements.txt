@@ -6,6 +6,7 @@ python-dotenv==1.2.2
 # Database & Environment
 psycopg2-binary==2.9.11
 django-environ==0.13.0
+psycopg2==2.9.11
 
 # Cloud Storage & Media
 boto3==1.42.62
