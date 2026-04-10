@@ -8,3 +8,5 @@ python-dotenv==1.2.2
 django-storages==1.14.6
 boto3==1.42.85
 psycopg2-binary==2.9.11
+markdown==3.10.2
+django-filter==25.2
