@@ -10,6 +10,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email=models.EmailField(unique=True, max_length=255,null=False,blank=False,db_index=True)
     telegram_id=models.CharField(max_length=255,null=True,blank=True,unique=True,db_index=True)
 
+    is_email_verified = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at=models.DateTimeField(auto_now_add=True)

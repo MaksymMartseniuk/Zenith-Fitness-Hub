@@ -10,3 +10,5 @@ boto3==1.42.85
 psycopg2-binary==2.9.11
 markdown==3.10.2
 django-filter==25.2
+django-allauth==65.16.0
+dj-rest-auth==7.2.0
