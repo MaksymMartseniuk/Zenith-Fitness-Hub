@@ -4,6 +4,9 @@ from .managers import UserManager
 
 # Create your models here.
 class User(AbstractBaseUser, PermissionsMixin):
+    """
+    User model for the application.
+    """
     email=models.EmailField(unique=True, max_length=255,null=False,blank=False,db_index=True)
     telegram_id=models.CharField(max_length=255,null=True,blank=True,unique=True,db_index=True)
 
@@ -21,6 +24,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Profile(models.Model):
+    """
+    Profile model for storing user profile information.
+    """
     class Genders(models.TextChoices):
         MALE = 'M', 'Male'
         FEMALE = 'F', 'Female'
