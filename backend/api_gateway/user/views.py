@@ -7,8 +7,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer
-from .utils import send_verification_email
+from .serializers import UserSerializer,CustomTokenObtainPairSerializer
+from .utils import send_verification_email,send_password_reset_email
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_str
@@ -21,8 +21,6 @@ class RegisterUserView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-        print(f"Received registration request with email: {email}")
-        print(f"Password provided: {'Yes' if password else 'No'}")
         if not email or not password:
             return Response({'error': 'Email and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
         if User.objects.filter(email=email).exists():
@@ -52,6 +50,50 @@ class VerifyEmailView(APIView):
             return Response({'message': 'Email verified successfully.'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid verification link.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class CustomerTokenObtainPairView(APIView):
+    permission_classes=[AllowAny]
+    def post(self, request):
+        serializer = CustomTokenObtainPairSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ForgetPasswordView(APIView):
+    permission_classes=[AllowAny]
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(email=email)
+            send_password_reset_email(user)
+        except User.DoesNotExist:
+           # For security reasons, we dont return an error if the email is not found, we just say that instructions have been sent
+           pass
+        return Response({'message': 'Password reset instructions sent to your email.'}, status=status.HTTP_200_OK)
+        
+class ResetPasswordView(APIView):
+    permission_classes=[AllowAny]
+    def post(self, request, uidb64, token):
+        password=request.data.get('password')
+        if not password:
+            return Response({'error': 'Password is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            uid=force_str(urlsafe_base64_decode(uidb64))
+            user=User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user=None
+        if user is not None and default_token_generator.check_token(user, token):
+            user.set_password(password)
+            user.save()
+            return Response({'message': 'Password reset successfully.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Invalid password reset link.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
         
 
 
