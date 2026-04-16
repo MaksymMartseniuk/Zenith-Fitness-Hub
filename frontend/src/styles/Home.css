@@ -1,0 +1,232 @@
+:root {
+    --bg-main: #0B1121;
+    --bg-card: #151C2C;
+    --bg-card-hover: #1E2638;
+    --accent-color: #FF472E;
+    --accent-hover: #FF6B57;
+    --text-main: #FFFFFF;
+    --text-muted: #94A3B8;
+    --border-color: #2A3441;
+}
+
+.home-container{
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-bottom: 50px;
+}
+
+ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+a{
+    text-decoration: none;
+}
+
+.navbar_home{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 5%;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.logo{
+    font-size: 1.2rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+}
+
+.nav-actions{
+    display: flex;
+    gap: 15px;
+}
+
+.btn{
+    display:inline-block;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-outline{
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--text-muted);
+}
+.btn-outline:hover{
+    color: white;
+    border-color: white;
+}
+
+.btn-primary{
+    background-color: var(--accent-color);
+    color: white;
+    border: 1px solid var(--accent-color);
+}
+.btn-primary:hover{
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-large {
+    padding: 12px 30px;
+    font-size: 1rem;
+    border-radius: 6px;
+}
+
+.hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 80px 5%;
+    max-width: 1920px;
+    margin: 0 auto;
+    gap: 50px;
+}
+
+.hero-content {
+    flex: 1;
+    max-width: 500px;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 40px;
+}
+
+.hero-image-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.hero-image-wrapper img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    opacity: 0.8; 
+}
+
+.features-section {
+    padding: 40px 5%;
+    max-width: 1920px;
+    margin: 0 auto;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.feature-card {
+    background-color: var(--bg-card);
+    padding: 50px 80px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    background-color: var(--bg-card-hover);
+}
+
+.feature-icon {
+    height: 100px;
+    margin-bottom: 20px;
+}
+
+.feature-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.feature-card p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.how-it-works-section {
+    padding: 80px 5%;
+    max-width: 1440px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.how-it-works-section h2 {
+    font-size: 2.5rem;
+    font-weight: 400;
+    margin-bottom: 40px;
+}
+
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.step-card {
+    background-color: var(--bg-card);
+    padding: 30px;
+    border-radius: 12px;
+    text-align: left;
+    border: 1px solid var(--border-color);
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.step-number {
+    color: var(--accent-color);
+    font-size: 1.5rem;
+    font-weight: 300;
+}
+
+.step-header h3 {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.step-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    padding-left: 45px;
+}
+
+.cta-section {
+    padding: 60px 5%;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.cta-card {
+    background-color: var(--bg-card);
+    padding: 50px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.cta-card h2 {
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 30px;
+}
