@@ -9,13 +9,6 @@
     --border-color: #2A3441;
 }
 
-.home-container{
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    min-height: 100vh;
-    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding-bottom: 50px;
-}
 
 ul{
     list-style: none;

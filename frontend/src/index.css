@@ -7,10 +7,10 @@
 body {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
     font-family: 'Arial', sans-serif;
-    background-color: #0F172A;
-    color: #F8FAFC;
+    background-color: var(--bg-main, #0B1121);
+    color: white;
+    min-height: 100vh;
 }
 
 a{

@@ -41,7 +41,7 @@ export function Home() {
 
     }]
     return(
-        <div className="home-container">
+        <>
             <header className="navbar_home">
                     <div className='logo'>Zenith Fitness Hub</div>
                     <ul className='nav-actions'>
@@ -96,6 +96,6 @@ export function Home() {
                     </div>
                 </section>
             </main>
-        </div>
+        </>
     )
 }

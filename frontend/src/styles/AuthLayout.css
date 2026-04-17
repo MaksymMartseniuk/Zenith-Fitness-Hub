@@ -1,0 +1,63 @@
+.auth-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    min-height: 100vh;
+    width: 100%;
+}
+
+.auth-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.auth-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+auth-image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(11, 17, 33, 0.1) 0%, #0B1121 100%);
+}
+
+.auth-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    background-color: #0B1121;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background-color: #151C2C;
+    padding: 50px 40px;
+    border-radius: 16px;
+    border: 1px solid #2A3441;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Коли екран менший за 900px (планшети та телефони) */
+@media (max-width: 900px) {
+    .auth-grid {
+        grid-template-columns: 1fr; 
+    }
+    
+    .auth-image-wrapper {
+        display: none; 
+    }
+
+    .auth-content {
+        padding: 20px; 
+    }
+
+    .auth-card {
+        padding: 40px 20px;
+    }
+}

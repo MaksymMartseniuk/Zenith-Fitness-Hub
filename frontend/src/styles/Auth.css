@@ -1,0 +1,145 @@
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.auth-title {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: white;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-label {
+    margin-bottom: 8px;
+    color: #94A3B8;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #2A3441;
+    background-color: #0B1121;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+.auth-input::placeholder {
+    color: #475569;
+}
+.auth-input:focus {
+    outline: none;
+    border-color: #FF472E;
+    box-shadow: 0 0 0 3px rgba(255, 71, 46, 0.15);
+}
+
+.auth-submit-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 14px;
+    background-color: #FF472E;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.auth-submit-btn:hover:not(:disabled) {
+    background-color: #e03e27;
+}
+
+.auth-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 25px 0;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #2A3441;
+}
+
+.auth-divider span {
+    padding: 0 15px;
+}
+
+.auth-socials {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.social-btn {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    background-color: transparent;
+    border: 1px solid #2A3441;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.social-btn:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: #475569;
+}
+
+/* --- НИЖНІ ПОСИЛАННЯ --- */
+.auth-footer-links {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #94A3B8;
+}
+
+.auth-footer-links a {
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.forgot-link {
+    display: inline-block;
+    color: #94A3B8;
+    margin-bottom: 15px;
+}
+
+.forgot-link:hover {
+    color: white;
+}
+
+.register-link {
+    color: #FF472E;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.register-link:hover {
+    text-decoration: underline;
+}
