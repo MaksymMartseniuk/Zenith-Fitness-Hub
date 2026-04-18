@@ -1,9 +1,8 @@
 import { Link,useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { AuthLayout } from '../components/layout/AuthLayout';
-import api from '../services/api.service';
-import {tokenService} from '../services/token.service';
 import '../styles/Auth.css';
+import { authService } from '../services/auth.service';
 export function Register(){
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -39,7 +38,7 @@ export function Register(){
         setIsLoading(true);
         setError('');
         try {
-            await api.post('/api/user/register/', { email, password });
+            await authService.register(email, password);
             //navigate('/login');
             setIsSuccess(true);
             const timer = setTimeout(() => {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import '../styles/Auth.css';
 import {tokenService} from '../services/token.service';
-import api from '../services/api.service';
+import { authService } from '../services/auth.service';
 export function Login(){
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -16,7 +16,7 @@ export function Login(){
         setIsLoading(true);
         setError('');
         try {
-            const response = await api.post('/api/user/login/', { email, password });
+            const response = await authService.login(email, password);
             const { access, refresh } = response.data;
             tokenService.setTokens(access, refresh);
             navigate('/dashboard');
