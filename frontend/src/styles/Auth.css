@@ -14,6 +14,7 @@
 .input-group {
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .auth-label {
@@ -142,4 +143,73 @@
 
 .register-link:hover {
     text-decoration: underline;
+}
+
+.password-requirements {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    margin-top: 5px;
+    background-color: #1E2638;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #2A3441;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    z-index: 999;
+}
+
+.password-requirements p {
+    margin: 0 0 10px 0;
+    font-size: 0.85rem;
+    color: #94A3B8;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.password-requirements li {
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s;
+}
+
+.password-requirements li.invalid {
+    color: #EF4444;
+}
+
+.password-requirements li.valid {
+    color: #10B981;
+}
+
+.success-message-container {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.success-message-container h3 {
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 15px;
+}
+
+.success-message-container p {
+    color: #94A3B8;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.success-message-container strong {
+    color: white;
 }

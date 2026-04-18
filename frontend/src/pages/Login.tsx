@@ -2,6 +2,8 @@ import { Link,useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { AuthLayout } from '../components/layout/AuthLayout';
 import '../styles/Auth.css';
+import {tokenService} from '../services/token.service';
+import api from '../services/api.service';
 export function Login(){
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -9,7 +11,22 @@ export function Login(){
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: React.FormEvent) => {}
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setError('');
+        try {
+            const response = await api.post('/api/user/login/', { email, password });
+            const { access, refresh } = response.data;
+            tokenService.setTokens(access, refresh);
+            navigate('/dashboard');
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Login failed. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+
+    }
 
     return(
         <AuthLayout>
