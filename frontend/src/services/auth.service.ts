@@ -11,5 +11,9 @@ export const authService = {
     logout: () => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+    },
+    verifyEmail: async (uid: string, token: string) => {
+        const response = await api.post(`/api/user/verify-email/${uid}/${token}/`);
+        return response;
     }
 }

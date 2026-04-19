@@ -1,0 +1,75 @@
+.verify-page {
+    min-height: 100vh;
+    width: 100%;
+    background-color: #0B1121;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.verify-card {
+    background-color: #151C2C;
+    border: 1px solid #2A3441;
+    border-radius: 16px;
+    padding: 50px 40px;
+    max-width: 450px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    display: inline-block;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3)); 
+}
+
+.verify-content h3 {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+.verify-content p {
+    color: #94A3B8;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.verify-btn {
+    display: inline-block; 
+    text-decoration: none;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.verify-content .success-icon:contains('❌') ~ .verify-btn {
+    background-color: #475569;
+}
+.verify-content .success-icon:contains('❌') ~ .verify-btn:hover {
+    background-color: #334155;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner-icon {
+    animation: spin 2s linear infinite;
+}
+
+.verify-content .error-message {
+    background-color: rgba(255, 71, 46, 0.1);
+    color: #FF472E;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    border: 1px solid rgba(255, 71, 46, 0.3);
+}
