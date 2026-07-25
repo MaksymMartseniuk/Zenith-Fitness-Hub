@@ -3,6 +3,7 @@ from .models import CustomUser, Profile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.password_validation import validate_password
 from .services import send_verification_email
+from rest_framework.exceptions import AuthenticationFailed
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -25,6 +26,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "is_superuser",
             "is_active",
             "is_verified",
+            "date_joined",
         ]
         read_only_fields = [
             "id",
@@ -32,6 +34,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "is_superuser",
             "is_active",
             "is_verified",
+            "date_joined",
         ]
 
     def validate(self, attrs):
@@ -80,12 +83,79 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        if not self.user.is_verified:
+            raise AuthenticationFailed(
+                "Please verify your email address before logging in."
+            )
+        return data
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         token["email"] = user.email
         token["is_staff"] = user.is_staff
+        token["is_superuser"] = user.is_superuser
         if hasattr(user, "profile"):
             token["first_name"] = user.profile.first_name
-            token["is_superuser"] = user.is_superuser
         return token
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    """Serializer for verifying a user's email using a verification code."""
+
+    email = serializers.EmailField(required=True)
+    verification_code = serializers.CharField(required=True, max_length=6)
+
+
+class ResendVerificationEmailSerializer(serializers.Serializer):
+    """Serializer for resending the verification code"""
+
+    email = serializers.EmailField(required=True)
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Serializer for sending a password reset link."""
+
+    email = serializers.EmailField(required=True)
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer for setting a new password via token."""
+
+    token = serializers.CharField(required=True)
+    password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError(
+                {"password": "The two password fields didn't match."}
+            )
+        return attrs
+
+
+class LogoutSerializer(serializers.Serializer):
+    """Serializer for handling user logout by blacklisting the refresh token."""
+
+    refresh = serializers.CharField(required=True)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """Serializer for changing password when user is already authenticated."""
+
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(
+        write_only=True, required=True, validators=[validate_password]
+    )
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError(
+                {"new_password": "The two password fields didn't match."}
+            )
+        return attrs

@@ -14,6 +14,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
     "users",
 ]
@@ -116,7 +118,17 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_THROTTLE_RATES": {
+        "register": "3/hour",
+        "login": "5/minute",
+        "verify_email": "10/hour",
+        "resend_verify": "3/hour",
+        "password_reset_req": "3/hour",
+        "password_reset_conf": "5/hour",
+        "change_password": "3/day",
+        "user_me": "60/minute",
+    },
 }
 
 SIMPLE_JWT = {
@@ -194,3 +206,11 @@ CACHES = {
         },
     }
 }
+CELERY_BEAT_SCHEDULE = {
+    "cleanup-unverified-users-daily": {
+        "task": "users.services.cleanup_unverified_users",
+        "schedule": crontab(hour=3, minute=0),
+    },
+}
+
+FRONTEND_URL = os.getenv("FRONTEND_URL")
