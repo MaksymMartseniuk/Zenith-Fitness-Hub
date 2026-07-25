@@ -9,6 +9,8 @@ from .serializers import (
     PasswordResetConfirmSerializer,
     LogoutSerializer,
     ChangePasswordSerializer,
+    GoogleAuthSerializer,
+    CustomTokenObtainPairSerializer,
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -18,7 +20,7 @@ from .services import send_verification_email, send_password_reset_email
 import secrets
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from throttles import (
+from .throttles import (
     RegisterRateThrottle,
     VerifyEmailRateThrottle,
     ResendVerifyRateThrottle,
@@ -26,8 +28,13 @@ from throttles import (
     PasswordResetRequestRateThrottle,
     ChangePasswordRateThrottle,
     UserMeRateThrottle,
+    LoginRateThrottle,
 )
 
+from google.oauth2 import id_token
+from google.auth.transport import requests as GoogleRequests
+from rest_framework_simplejwt.views import TokenObtainPairView
+from core.settings import GOOGLE_CLIENT_ID
 
 # Create your views here.
 
@@ -53,6 +60,10 @@ class UserRegistrationView(CreateAPIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class CustomeTokenObtainPairView(TokenObtainPairView):
+    throttle_classes = (LoginRateThrottle,)
 
 
 class UserVerificationEmailView(GenericAPIView):
@@ -259,3 +270,49 @@ class UserMeView(RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class GoogleLoginView(GenericAPIView):
+    """
+    Endpoint for Google Social Authentication.
+    Accepts an id_token, verifies it with Google, and returns JWT tokens.
+    """
+
+    permission_classes = [AllowAny]
+    serializer_class = GoogleAuthSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data["token_id"]
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token, GoogleRequests.Request(), GOOGLE_CLIENT_ID
+            )
+            email = idinfo["email"]
+            first_name = idinfo.get("given_name", "")
+            last_name = idinfo.get("family_name", "")
+
+            user, created = CustomUser.objects.get_or_create(email=email)
+            if created:
+                user.is_verified = True
+                user.set_unusable_password()
+                user.save()
+                user.profile.first_name = first_name
+                user.profile.last_name = last_name
+                user.profile.save(update_fields=["first_name", "last_name"])
+            refresh = CustomTokenObtainPairSerializer.get_token(user)
+            return Response(
+                {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "is_new_user": created,
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except ValueError:
+            return Response(
+                {"error": "Invalid or expired Google token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

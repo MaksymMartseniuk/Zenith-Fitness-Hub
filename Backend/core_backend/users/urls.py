@@ -9,8 +9,10 @@ from .views import (
     ChangePasswordView,
     UserMeView,
     LogoutView,
+    CustomeTokenObtainPairView,
+    GoogleLoginView,
 )
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 from .throttles import LoginRateThrottle
 
 
@@ -18,7 +20,7 @@ userurlpatterns = [
     path("register/", UserRegistrationView.as_view(), name="user-register"),
     path(
         "token/",
-        TokenObtainPairView.as_view(throttle_classes=(LoginRateThrottle,)),
+        CustomeTokenObtainPairView.as_view(),
         name="token-obtain",
     ),
     path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
@@ -41,4 +43,5 @@ userurlpatterns = [
     ),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("me/", UserMeView.as_view(), name="me"),
+    path("google-login", GoogleLoginView.as_view(), name="google-login"),
 ]
