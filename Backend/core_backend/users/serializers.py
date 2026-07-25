@@ -159,3 +159,9 @@ class ChangePasswordSerializer(serializers.Serializer):
                 {"new_password": "The two password fields didn't match."}
             )
         return attrs
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    """Accepts id_token from frontend for Google authorization"""
+
+    token_id = serializers.CharField()
