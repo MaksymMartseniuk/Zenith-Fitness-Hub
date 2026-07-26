@@ -1,35 +1,35 @@
-import { useState } from "react"
-import api from "../api"
-import { useNavigate } from "react-router-dom"
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants"
-import image from "../assets/image.png"
+import { useState } from "react";
+import api from "../api";
+import { useNavigate } from "react-router-dom";
+import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
+import image from "../assets/image.png";
 
 function Form({ route, method }) {
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const name = method === "login" ? "Login" : "Register"
+  const name = method === "login" ? "Login" : "Register";
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
     try {
-      const res = await api.post(route, { username, password })
+      const res = await api.post(route, { username, password });
       if (method === "login") {
-        localStorage.setItem(ACCESS_TOKEN, res.data.access)
-        localStorage.setItem(REFRESH_TOKEN, res.data.refresh)
-        navigate("/")
+        localStorage.setItem(ACCESS_TOKEN, res.data.access);
+        localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+        navigate("/");
       } else {
-        navigate("/login")
+        navigate("/login");
       }
     } catch (error) {
-      alert(error)
+      alert(error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="login-page">
@@ -64,13 +64,16 @@ function Form({ route, method }) {
 
         <p className="signup-text">
           Don't have an account?{" "}
-          <span onClick={() => navigate("/register")} style={{ cursor: "pointer" }}>
+          <span
+            onClick={() => navigate("/register")}
+            style={{ cursor: "pointer" }}
+          >
             Sign up
           </span>
         </p>
       </form>
     </div>
-  )
+  );
 }
 
-export default Form
+export default Form;
