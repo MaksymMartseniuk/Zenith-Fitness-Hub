@@ -152,10 +152,11 @@ class PasswordResetRequestView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
         try:
+            CustomUser.objects.get(email=email)
             reset_token = secrets.token_urlsafe(32)
             cache_key = f"reset_token:{reset_token}"
             cache.set(cache_key, email, timeout=900)
-            send_password_reset_email(email, reset_token)
+            send_password_reset_email.delay(email, reset_token)
         except CustomUser.DoesNotExist:
             pass
 
