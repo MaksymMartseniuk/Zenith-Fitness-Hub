@@ -16,9 +16,16 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.cache import cache
-from .services import send_verification_email, send_password_reset_email
+from .services import (
+    send_verification_email,
+    send_password_reset_email,
+)
 import secrets
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import (
+    OutstandingToken,
+    BlacklistedToken,
+)
 
 from .throttles import (
     RegisterRateThrottle,
@@ -35,8 +42,22 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as GoogleRequests
 from rest_framework_simplejwt.views import TokenObtainPairView
 from core.settings import GOOGLE_CLIENT_ID
+from django.db import transaction
+import hmac
 
 # Create your views here.
+
+
+def _blacklist_all_tokens_for_user(user: CustomUser):
+    """Blacklist every outstanding refresh token for a user.
+
+    Call this whenever a user's password changes, so old tokens
+    (e.g. stolen ones) stop working immediately instead of staying
+    valid until natural expiry.
+    """
+    outstanding_tokens = OutstandingToken.objects.filter(user=user)
+    for outstanding_token in outstanding_tokens:
+        BlacklistedToken.objects.get_or_create(token=outstanding_token)
 
 
 class UserRegistrationView(CreateAPIView):
@@ -53,7 +74,12 @@ class UserRegistrationView(CreateAPIView):
         """Override the create method to handle user registration."""
         serializer_data = self.get_serializer(data=request.data)
         serializer_data.is_valid(raise_exception=True)
-        serializer_data.save()
+        with transaction.atomic():
+            user = serializer_data.save()
+            transaction.on_commit(
+                lambda: send_verification_email.delay(user_id=user.id)
+            )
+
         return Response(
             {
                 "message": "User registered successfully. Please check your email for verification.",
@@ -75,36 +101,41 @@ class UserVerificationEmailView(GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer_data = self.get_serializer(data=request.data)
-        serializer_data.is_valid()
+        serializer_data.is_valid(raise_exception=True)
         email = serializer_data.validated_data["email"]
         verification_code = serializer_data.validated_data["verification_code"]
-        cache_key: str = f"email_verification_code_{email}"
-        saved_code = cache.get(cache_key)
 
-        if saved_code is None or str(saved_code) != str(verification_code):
+        try:
+            user: CustomUser = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
             return Response(
                 {"error": "Invalid or expired verification code."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        try:
-            user: CustomUser = CustomUser.objects.get(email=email)
-            if user.is_verified:
-                return Response(
-                    {"message": "Email is already verified."}, status=status.HTTP_200_OK
-                )
-            user.is_verified = True
-            user.save(update_fields=["is_verified"])
-            cache.delete(cache_key)
+        if user.is_verified:
+            return Response(
+                {"message": "Email is already verified."}, status=status.HTTP_200_OK
+            )
 
+        cache_key: str = f"email_verification_code_{email}"
+        saved_code = cache.get(cache_key)
+
+        if saved_code is None or not hmac.compare_digest(
+            str(saved_code), str(verification_code)
+        ):
             return Response(
-                {"message": "Email verified successfully! You can now log in."},
-                status=status.HTTP_200_OK,
+                {"error": "Invalid or expired verification code."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-        except CustomUser.DoesNotExist:
-            return Response(
-                {"error": "User with this email does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+
+        user.is_verified = True
+        user.save(update_fields=["is_verified"])
+        cache.delete(cache_key)
+
+        return Response(
+            {"message": "Email verified successfully! You can now log in."},
+            status=status.HTTP_200_OK,
+        )
 
 
 class ResendVerificationEmailView(GenericAPIView):
