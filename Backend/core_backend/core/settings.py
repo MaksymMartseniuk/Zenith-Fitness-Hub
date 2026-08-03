@@ -124,8 +124,8 @@ REST_FRAMEWORK = {
         "login": "5/minute",
         "verify_email": "10/hour",
         "resend_verify": "3/hour",
-        "password_reset_req": "3/hour",
-        "password_reset_conf": "5/hour",
+        "password_reset_request": "3/hour",
+        "password_reset_confirm": "5/hour",
         "change_password": "3/day",
         "user_me": "60/minute",
     },
@@ -137,6 +137,8 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
     "TOKEN_OBTAIN_SERIALIZER": "users.serializers.CustomTokenObtainPairSerializer",
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ROTATE_REFRESH_TOKENS": True,
 }
 
 AUTH_PASSWORD_VALIDATORS = [

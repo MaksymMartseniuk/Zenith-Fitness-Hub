@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import CustomUser, Profile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.password_validation import validate_password
-from .services import send_verification_email
 from rest_framework.exceptions import AuthenticationFailed
 
 
@@ -30,6 +29,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
+            "telegram_id",
             "is_staff",
             "is_superuser",
             "is_active",
@@ -53,7 +53,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user = CustomUser(**validated_data)
         user.set_password(password)
         user.save()
-        send_verification_email.delay(user.id)  # Send verification email asynchronously
         return user
 
 

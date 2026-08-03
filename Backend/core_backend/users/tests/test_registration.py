@@ -33,7 +33,8 @@ class UserRegistrationTest(APITestCase):
     @patch("users.views.send_verification_email.delay")
     def test_user_registration_success(self, mock_send_email):
         """TEST SUCCESS: Ensure a new user can register successfully with valid credentials."""
-        response = self.client.post(self.register_url, self.user_data)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(self.register_url, self.user_data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(CustomUser.objects.count(), 1)
@@ -41,7 +42,7 @@ class UserRegistrationTest(APITestCase):
         user = CustomUser.objects.get(email=self.user_data["email"])
 
         self.assertFalse(user.is_verified)
-        mock_send_email.assert_called_once_with(user.id)
+        mock_send_email.assert_called_once_with(user_id=user.id)
 
     def test_user_registration_duplicate_email(self):
         """TEST FAILURE: Ensure registration is rejected if the email is already registered."""

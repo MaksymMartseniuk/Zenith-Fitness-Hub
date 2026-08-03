@@ -13,8 +13,6 @@ from .views import (
     GoogleLoginView,
 )
 from rest_framework_simplejwt.views import TokenRefreshView
-from .throttles import LoginRateThrottle
-
 
 userurlpatterns = [
     path("register/", UserRegistrationView.as_view(), name="user-register"),
