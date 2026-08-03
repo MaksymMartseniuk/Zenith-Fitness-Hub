@@ -21,7 +21,7 @@ from .services import (
     send_password_reset_email,
 )
 import secrets
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from rest_framework_simplejwt.token_blacklist.models import (
     OutstandingToken,
     BlacklistedToken,
@@ -44,6 +44,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from core.settings import GOOGLE_CLIENT_ID
 from django.db import transaction
 import hmac
+from google.auth.exceptions import GoogleAuthError
 
 # Create your views here.
 
@@ -150,25 +151,21 @@ class ResendVerificationEmailView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         email = serializer.validated_data["email"]
+        generic_response = Response(
+            {
+                "message": "If an account with this email exists and is not verified, "
+                "a new verification code has been sent."
+            },
+            status=status.HTTP_200_OK,
+        )
         try:
             user: CustomUser = CustomUser.objects.get(email=email)
-            if user.is_verified:
-                return Response(
-                    {"message": "Email is already verified. You can log in."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            send_verification_email.delay(user_id=user.id)
-            return Response(
-                {
-                    "message": "Verification code resent successfully. Please check your email."
-                },
-                status=status.HTTP_200_OK,
-            )
         except CustomUser.DoesNotExist:
-            return Response(
-                {"error": "User with this email not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            return generic_response
+        if user.is_verified:
+            return generic_response
+        send_verification_email.delay(user_id=user.id)
+        return generic_response
 
 
 class PasswordResetRequestView(GenericAPIView):
@@ -182,14 +179,11 @@ class PasswordResetRequestView(GenericAPIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
-        try:
-            CustomUser.objects.get(email=email)
+        if CustomUser.objects.filter(email=email).exists():
             reset_token = secrets.token_urlsafe(32)
             cache_key = f"reset_token:{reset_token}"
             cache.set(cache_key, email, timeout=900)
             send_password_reset_email.delay(email, reset_token)
-        except CustomUser.DoesNotExist:
-            pass
 
         return Response(
             {
@@ -220,8 +214,11 @@ class PasswordResetConfirmView(GenericAPIView):
             )
         try:
             user: CustomUser = CustomUser.objects.get(email=email)
-            user.set_password(new_password)
-            user.save(update_fields=["password"])
+            with transaction.atomic():
+                user.set_password(new_password)
+                user.save(update_fields=["password"])
+                _blacklist_all_tokens_for_user(user)
+
             cache.delete(cache_key)
             return Response(
                 {
@@ -256,7 +253,7 @@ class LogoutView(GenericAPIView):
                 {"message": "Successfully logged out."},
                 status=status.HTTP_205_RESET_CONTENT,
             )
-        except Exception:
+        except TokenError:
             return Response(
                 {"error": "Token is invalid or already blacklisted."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -284,8 +281,10 @@ class ChangePasswordView(GenericAPIView):
             )
 
         new_password = serializer.validated_data["new_password"]
-        user.set_password(new_password)
-        user.save(update_fields=["password"])
+        with transaction.atomic():
+            user.set_password(new_password)
+            user.save(update_fields=["password"])
+            _blacklist_all_tokens_for_user(user)
         return Response(
             {"message": "Password updated successfully."}, status=status.HTTP_200_OK
         )
@@ -321,10 +320,22 @@ class GoogleLoginView(GenericAPIView):
             idinfo = id_token.verify_oauth2_token(
                 token, GoogleRequests.Request(), GOOGLE_CLIENT_ID
             )
-            email = idinfo["email"]
-            first_name = idinfo.get("given_name", "")
-            last_name = idinfo.get("family_name", "")
+        except ValueError:
+            return Response(
+                {"error": "Invalid or expired Google token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except GoogleAuthError:
+            return Response(
+                {"error": "Could not verify token with Google. Please try again."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
+        email = idinfo["email"]
+        first_name = idinfo.get("given_name", "")
+        last_name = idinfo.get("family_name", "")
+
+        with transaction.atomic():
             user, created = CustomUser.objects.get_or_create(email=email)
             if created:
                 user.is_verified = True
@@ -333,18 +344,13 @@ class GoogleLoginView(GenericAPIView):
                 user.profile.first_name = first_name
                 user.profile.last_name = last_name
                 user.profile.save(update_fields=["first_name", "last_name"])
-            refresh = CustomTokenObtainPairSerializer.get_token(user)
-            return Response(
-                {
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                    "is_new_user": created,
-                },
-                status=status.HTTP_200_OK,
-            )
 
-        except ValueError:
-            return Response(
-                {"error": "Invalid or expired Google token."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        refresh = CustomTokenObtainPairSerializer.get_token(user)
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "is_new_user": created,
+            },
+            status=status.HTTP_200_OK,
+        )
